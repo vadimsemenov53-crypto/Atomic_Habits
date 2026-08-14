@@ -1,7 +1,10 @@
 from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter
 from rest_framework.viewsets import ModelViewSet
 from habits.models import Habit
 from habits.paginations import CustomPagination
+from habits.serializers import HabitSerializer
 
 
 class HabitViewSet(ModelViewSet):
@@ -10,6 +13,13 @@ class HabitViewSet(ModelViewSet):
     queryset = Habit.objects.all()
     serializer_class = HabitSerializer
     pagination_class = CustomPagination
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    ordering_fields = ("period",)
+    filterset_fields = [
+        "place",
+        "action",
+        "reward",
+    ]
 
     def get_queryset(self):
         """ Метод переопределения получения данных. """
@@ -18,7 +28,7 @@ class HabitViewSet(ModelViewSet):
         )
 
     def perform_create(self, serializer):
-        """Метод отвечающий за автоматическое заполнение владельца"""
-        habit = serializer.save()
+        """Метод отвечающий за автоматическое заполнение пользователя."""
+        habit = serializer.save(user=self.request.user)
         habit.user = self.request.user
         habit.save()

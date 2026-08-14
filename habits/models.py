@@ -1,4 +1,4 @@
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from config.settings import AUTH_USER_MODEL
 
@@ -51,7 +51,8 @@ class Habit(models.Model):
         blank=True,
     )
     duration = models.PositiveIntegerField(
-        verbose_name="Время на выполнение",
+        validators=[MaxValueValidator(2)],
+        verbose_name="Время на выполнение (мин)",
         help_text="Укажите время выполнения привычки."
     )
     is_public = models.BooleanField(
