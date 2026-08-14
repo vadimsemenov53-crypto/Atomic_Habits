@@ -55,4 +55,7 @@ class HabitSerializer(serializers.ModelSerializer):
         if not is_pleasant and not related_habit and not reward:
             raise ValidationError("Полезная привычка должна иметь связанную привычку или вознаграждение.")
 
+        if not is_pleasant and related_habit and reward:
+            raise  ValidationError("Полезная привычка не может иметь одновременно связанную причку и вознаграждение.")
+
         return attrs
