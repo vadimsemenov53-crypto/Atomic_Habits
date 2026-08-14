@@ -29,6 +29,8 @@ class HabitViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         """Метод отвечающий за автоматическое заполнение пользователя."""
+
+
         habit = serializer.save(user=self.request.user)
         habit.user = self.request.user
         habit.save()

@@ -35,12 +35,14 @@ class Habit(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        verbose_name="Связанная привычка",
+        help_text="Укажите связанную привычку",
         related_name="dependent_habits",
     )
     period = models.PositiveIntegerField(
         default=1,
-        validators=[MinValueValidator(1)],
-        verbose_name="Периодичность",
+        validators=[MinValueValidator(1), MaxValueValidator(7)],
+        verbose_name="Периодичность (раз в неделю)",
         help_text="Укажите периодичность выполнения",
     )
     reward = models.CharField(
@@ -51,8 +53,8 @@ class Habit(models.Model):
         blank=True,
     )
     duration = models.PositiveIntegerField(
-        validators=[MaxValueValidator(2)],
-        verbose_name="Время на выполнение (мин)",
+        validators=[MinValueValidator(1), MaxValueValidator(120)],
+        verbose_name="Время на выполнение (сек.)",
         help_text="Укажите время выполнения привычки."
     )
     is_public = models.BooleanField(
