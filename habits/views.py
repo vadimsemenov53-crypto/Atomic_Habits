@@ -5,6 +5,7 @@ from rest_framework.viewsets import ModelViewSet
 from habits.models import Habit
 from habits.paginations import CustomPagination
 from habits.serializers import HabitSerializer
+from users.permissions import IsOwner
 
 
 class HabitViewSet(ModelViewSet):
@@ -27,10 +28,16 @@ class HabitViewSet(ModelViewSet):
             Q(user=self.request.user) | Q(is_public=True)
         )
 
+    def get_permissions(self):
+        """Метод отвечающий за перераспределение прав доступа"""
+
+        if self.action in ["update", "partial_update", "retrieve", "destroy"]:
+            self.permission_classes = (IsOwner,)
+
+        return super().get_permissions()
+
     def perform_create(self, serializer):
         """Метод отвечающий за автоматическое заполнение пользователя."""
-
-
         habit = serializer.save(user=self.request.user)
         habit.user = self.request.user
         habit.save()
