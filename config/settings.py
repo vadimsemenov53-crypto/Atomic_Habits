@@ -126,6 +126,25 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabasesScheduler"
+
+CELERY_BEAT_SCHEDULE = {
+    "send_information_about_start_habit": {
+        "task": "habits.tasks.send_information_about_start_habit",  # Путь к задаче
+        "schedule": timedelta(hours=1),  # Расписание выполнения задачи (например, каждые 10 минут)
+    },
+}
+
+TELEGRAM_URL = "https://api.telegram.org/bot"
+TOKEN_BOT_TG = os.getenv("TOKEN_BOT_TG")
+
 # MAILERS = {
 #     "default": {
 #         "BACKEND": "django.core.mail.backends.console.EmailBackend",
