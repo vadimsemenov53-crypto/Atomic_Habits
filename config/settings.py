@@ -138,7 +138,7 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabasesScheduler"
 CELERY_BEAT_SCHEDULE = {
     "send_information_about_start_habit": {
         "task": "habits.tasks.send_information_about_start_habit",  # Путь к задаче
-        "schedule": timedelta(hours=1),  # Расписание выполнения задачи (например, каждые 10 минут)
+        "schedule": timedelta(minutes=1),  # Расписание выполнения задачи (например, каждые 10 минут)
     },
 }
 

@@ -1,4 +1,8 @@
+import datetime
+from datetime import timedelta
+
 from django.db.models import Q
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 from rest_framework.viewsets import ModelViewSet
@@ -40,4 +44,17 @@ class HabitViewSet(ModelViewSet):
         """Метод отвечающий за автоматическое заполнение пользователя."""
         habit = serializer.save(user=self.request.user)
         habit.user = self.request.user
+
+        now = timezone.localtime()
+        reminder_date = timezone.localdate()
+
+        if now.time() >= habit.time:
+            reminder_date += timedelta(days=1)
+
+        habit.next_reminder = timezone.make_aware(
+            datetime.datetime.combine(
+                reminder_date,
+                habit.time,
+            )
+        )
         habit.save()

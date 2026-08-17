@@ -63,6 +63,13 @@ class Habit(models.Model):
         help_text="Укажите публичность",
     )
 
+    next_reminder = models.DateTimeField(
+        verbose_name="Время следующего выполнения",
+        help_text="Укажите время следующего выполнения",
+        null=True,
+        blank=True,
+    )
+
     def __str__(self):
         """ Метод строкового отображения. """
         return f'я буду {self.action} в {self.time} в {self.place}'
