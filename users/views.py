@@ -5,7 +5,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from users.models import User
 from users.permissions import IsProfile, IsSuperUser
-from users.serializer import UserSerializer, UserPublicSerializer
+from users.serializer import UserPublicSerializer, UserSerializer
 
 
 class UserViewSet(ModelViewSet):
@@ -22,8 +22,8 @@ class UserViewSet(ModelViewSet):
 
     @swagger_auto_schema(responses={200: UserPublicSerializer})
     def retrieve(self, request, *args, **kwargs):
-        """ Переопределения метода retrieve у ModelViewSet
-        (Отображение публичного UserPublicSerializer документации.) """
+        """Переопределения метода retrieve у ModelViewSet
+        (Отображение публичного UserPublicSerializer документации.)"""
         return super().retrieve(request, *args, **kwargs)
 
     def get_serializer_class(self):
@@ -37,7 +37,7 @@ class UserViewSet(ModelViewSet):
         return UserSerializer
 
     def get_permissions(self):
-        """ Переопределение прав доступа для UserViewSet. """
+        """Переопределение прав доступа для UserViewSet."""
         if self.action == "create":
             self.permission_classes = (AllowAny,)
 

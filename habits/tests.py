@@ -1,8 +1,4 @@
-import datetime
-
-from django.contrib.auth.models import Group
 from django.urls import reverse
-from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -11,7 +7,7 @@ from users.models import User
 
 
 class HabitTestCase(APITestCase):
-    """ Тест кейс контроллера HabitViewSet. """
+    """Тест кейс контроллера HabitViewSet."""
 
     def setUp(self):
         """Начальный сет-ап с тестовыми данными."""
@@ -51,16 +47,15 @@ class HabitTestCase(APITestCase):
                     "duration": 120,
                     "is_public": True,
                     "next_reminder": None,
-                    "reminder_10_sent": None
+                    "reminder_10_sent": None,
                 },
-            ]
+            ],
         }
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(Habit.objects.all().count(), 1)
         self.assertTrue(Habit.objects.all().exists())
         self.assertEqual(data, result)
-
 
     def test_habit_retrieve(self):
         """Тестирование получаемых данных для -> habits:habits_data-detail."""
@@ -70,7 +65,6 @@ class HabitTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(data.get("action"), self.habit_1.action)
-
 
     def test_course_create(self):
         """Тестирование создания привычки для -> habits:habits_data-list."""

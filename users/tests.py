@@ -59,9 +59,7 @@ class UserTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-        self.assertEqual(response.json(), {
-            "detail": "Не найдено активной учетной записи с указанными данными"
-        })
+        self.assertEqual(response.json(), {"detail": "Не найдено активной учетной записи с указанными данными"})
 
     def test_get_info_profile(self):
         """Тестирование получаемых данных для -> users:users-detail."""
@@ -76,7 +74,6 @@ class UserTestCase(APITestCase):
         self.assertEqual(data.get("first_name"), self.user1.first_name)
         self.assertIn("tg_chat_id", data)
 
-
     def test_get_info_another_profile(self):
         """Тестирование получаемых данных для -> users:users-detail."""
         self.client.force_authenticate(user=self.user1)
@@ -89,7 +86,6 @@ class UserTestCase(APITestCase):
         self.assertEqual(data.get("email"), self.user2.email)
         self.assertNotIn("first_name", data)
         self.assertNotIn("tg_chat_id", data)
-
 
     def test_update_profile(self):
         """Тестирование получаемых данных для -> users:users-detail."""
@@ -112,7 +108,6 @@ class UserTestCase(APITestCase):
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
         self.assertEqual(data.get("first_name"), update_data["first_name"])
         self.assertEqual(data.get("tg_chat_id"), update_data["tg_chat_id"])
-
 
     def test_delete_user(self):
         """Тестирование получаемых данных для -> users:users-detail (DELETE)."""
