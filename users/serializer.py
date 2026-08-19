@@ -15,6 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "password",
             "tg_chat_id",
+            "password",
         )
 
     def create(self, validated_data):
@@ -25,3 +26,12 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+
+class UserPublicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            "id",
+            "email",
+        )
