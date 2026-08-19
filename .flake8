@@ -4,4 +4,6 @@ max-line-length = 119
 exclude =
     __init__.py,
     .venv/,
-    .git/
+    .git/,
+    ./users/migrations/,
+    ./habits/migrations/,
