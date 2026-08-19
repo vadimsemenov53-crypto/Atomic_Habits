@@ -69,6 +69,12 @@ class Habit(models.Model):
         null=True,
         blank=True,
     )
+    reminder_10_sent = models.DateTimeField(
+        verbose_name="Время напоминания о выполнении",
+        help_text="Укажите время напоминания",
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         """ Метод строкового отображения. """

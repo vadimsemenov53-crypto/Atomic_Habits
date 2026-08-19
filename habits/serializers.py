@@ -21,6 +21,7 @@ class HabitSerializer(serializers.ModelSerializer):
             "duration",
             "is_public",
             "next_reminder",
+            "reminder_10_sent",
         )
         read_only_fields = ("user",)
 

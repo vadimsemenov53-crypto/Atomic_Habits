@@ -12,6 +12,7 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "password",
+            "tg_chat_id",
         )
 
     def create(self, validated_data):
