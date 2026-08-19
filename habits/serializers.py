@@ -1,10 +1,11 @@
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
+
 from habits.models import Habit
 
 
 class HabitSerializer(serializers.ModelSerializer):
-    """ Сериализатор для модели Habit. """
+    """Сериализатор для модели Habit."""
 
     class Meta:
         model = Habit
@@ -26,21 +27,12 @@ class HabitSerializer(serializers.ModelSerializer):
         read_only_fields = ("user",)
 
     def validate(self, attrs):
-        """ Переопределение метода validate для правильного формирования структуры привычек. """
+        """Переопределение метода validate для правильного формирования структуры привычек."""
         instance = self.instance
 
-        is_pleasant = attrs.get(
-            "is_pleasant",
-            instance.is_pleasant if instance else False
-        )
-        related_habit = attrs.get(
-            "related_habit",
-            instance.related_habit if instance else None
-        )
-        reward = attrs.get(
-            "reward",
-            instance.reward if instance else None
-        )
+        is_pleasant = attrs.get("is_pleasant", instance.is_pleasant if instance else False)
+        related_habit = attrs.get("related_habit", instance.related_habit if instance else None)
+        reward = attrs.get("reward", instance.reward if instance else None)
 
         if is_pleasant and reward:
             raise ValidationError("У приятной привычки не может быть вознаграждения.")
@@ -58,6 +50,6 @@ class HabitSerializer(serializers.ModelSerializer):
             raise ValidationError("Полезная привычка должна иметь связанную привычку или вознаграждение.")
 
         if not is_pleasant and related_habit and reward:
-            raise  ValidationError("Полезная привычка не может иметь одновременно связанную причку и вознаграждение.")
+            raise ValidationError("Полезная привычка не может иметь одновременно связанную причку и вознаграждение.")
 
         return attrs

@@ -14,4 +14,3 @@ class UserAdmin(admin.ModelAdmin):
         "id",
         "email",
     )
-

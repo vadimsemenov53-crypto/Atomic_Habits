@@ -1,10 +1,12 @@
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 from config.settings import AUTH_USER_MODEL
 
 
 class Habit(models.Model):
-    """ Класс представления модели 'Привычка'. """
+    """Класс представления модели 'Привычка'."""
+
     user = models.ForeignKey(
         AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -55,7 +57,7 @@ class Habit(models.Model):
     duration = models.PositiveIntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(120)],
         verbose_name="Время на выполнение (сек.)",
-        help_text="Укажите время выполнения привычки."
+        help_text="Укажите время выполнения привычки.",
     )
     is_public = models.BooleanField(
         default=False,
@@ -77,8 +79,8 @@ class Habit(models.Model):
     )
 
     def __str__(self):
-        """ Метод строкового отображения. """
-        return f'я буду {self.action} в {self.time} в {self.place}'
+        """Метод строкового отображения."""
+        return f"я буду {self.action} в {self.time} в {self.place}"
 
     class Meta:
         verbose_name = "Привычка"

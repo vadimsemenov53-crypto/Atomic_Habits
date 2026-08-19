@@ -6,6 +6,7 @@ from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 from rest_framework.viewsets import ModelViewSet
+
 from habits.models import Habit
 from habits.paginations import CustomPagination
 from habits.serializers import HabitSerializer
@@ -27,10 +28,8 @@ class HabitViewSet(ModelViewSet):
     ]
 
     def get_queryset(self):
-        """ Метод переопределения получения данных. """
-        return Habit.objects.filter(
-            Q(user=self.request.user) | Q(is_public=True)
-        )
+        """Метод переопределения получения данных."""
+        return Habit.objects.filter(Q(user=self.request.user) | Q(is_public=True))
 
     def get_permissions(self):
         """Метод отвечающий за перераспределение прав доступа"""
@@ -46,18 +45,18 @@ class HabitViewSet(ModelViewSet):
         habit.user = self.request.user
 
         now = timezone.localtime()
-        reminder_date = timezone.localdate() # 2026-08-19
+        reminder_date = timezone.localdate()  # 2026-08-19
 
         if now.time() >= habit.time:
             reminder_date += timedelta(days=1)
 
         time_next_reminder = timezone.make_aware(  # 2026-08-19T20:00:00+03:00 (Moscow - TIME_ZONE)
-            datetime.datetime.combine(   # 2026-08-19T20:00:00
-                reminder_date, # 2026-08-19
-                habit.time, # "time": "20:00:00"
+            datetime.datetime.combine(  # 2026-08-19T20:00:00
+                reminder_date,  # 2026-08-19
+                habit.time,  # "time": "20:00:00"
             )
         )
 
         habit.next_reminder = time_next_reminder  # 2026-08-19T20:00:00+03:00
-        habit.reminder_10_sent = time_next_reminder - timedelta(minutes=10) # 2026-08-19T19:50:00+03:00
+        habit.reminder_10_sent = time_next_reminder - timedelta(minutes=10)  # 2026-08-19T19:50:00+03:00
         habit.save()
