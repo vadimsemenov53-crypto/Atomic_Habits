@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
@@ -32,6 +33,7 @@ class HabitViewSet(ModelViewSet):
         """Метод переопределения получения данных."""
         return Habit.objects.filter(user=self.request.user)
 
+    @swagger_auto_schema(responses={200: HabitSerializer})
     @action(detail=False, methods=("get",))
     def public(self, request):
         """Метод для отображения всех публичных привычек."""
