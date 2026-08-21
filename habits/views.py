@@ -1,10 +1,11 @@
 import datetime
 from datetime import timedelta
 
-from django.db.models import Q
+from rest_framework.decorators import action
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from habits.models import Habit
@@ -29,7 +30,15 @@ class HabitViewSet(ModelViewSet):
 
     def get_queryset(self):
         """Метод переопределения получения данных."""
-        return Habit.objects.filter(Q(user=self.request.user) | Q(is_public=True))
+        return Habit.objects.filter(user=self.request.user)
+
+    @action(detail=False, methods=("get",))
+    def public(self, request):
+        """ Метод для отображения всех публичных привычек. """
+        queryset = Habit.objects.filter(is_public=True)
+        serializer = self.get_serializer(queryset, many=True)
+
+        return Response(serializer.data)
 
     def get_permissions(self):
         """Метод отвечающий за перераспределение прав доступа"""
