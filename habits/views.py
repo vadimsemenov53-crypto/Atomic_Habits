@@ -1,9 +1,9 @@
 import datetime
 from datetime import timedelta
 
-from rest_framework.decorators import action
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -34,7 +34,7 @@ class HabitViewSet(ModelViewSet):
 
     @action(detail=False, methods=("get",))
     def public(self, request):
-        """ Метод для отображения всех публичных привычек. """
+        """Метод для отображения всех публичных привычек."""
         queryset = Habit.objects.filter(is_public=True)
         serializer = self.get_serializer(queryset, many=True)
 
