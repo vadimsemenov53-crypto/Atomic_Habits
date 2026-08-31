@@ -1,8 +1,7 @@
 services:
   web:
     container_name: atomic_habits
-#    image: ${DOCKER_HUB_USERNAME}/atomic_habits:${IMAGE_TAG:-latest}
-    build: .
+    image: ${DOCKER_HUB_USERNAME}/atomic_habits:${IMAGE_TAG:-latest}
     command: sh -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:8000"
     volumes:
       - .:/app
@@ -64,8 +63,7 @@ services:
 
   celery_worker:
     container_name: celery_worker
-#    image: ${DOCKER_HUB_USERNAME}/atomic_habits:${IMAGE_TAG:-latest}
-    build: .
+    image: ${DOCKER_HUB_USERNAME}/atomic_habits:${IMAGE_TAG:-latest}
     command: sh -c "celery -A config worker --loglevel=info"
     env_file:
       - ./.env
@@ -77,8 +75,7 @@ services:
 
   celery_beat:
     container_name: celery_beat
-#    image: ${DOCKER_HUB_USERNAME}/atomic_habits:${IMAGE_TAG:-latest}
-    build: .
+    image: ${DOCKER_HUB_USERNAME}/atomic_habits:${IMAGE_TAG:-latest}
     command: sh -c "celery -A config beat --loglevel=info"
     env_file:
       - ./.env
