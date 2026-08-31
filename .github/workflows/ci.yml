@@ -101,3 +101,44 @@ jobs:
 
       - name: Run Flake8
         run: poetry run flake8 .
+
+  build:
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v7
+
+      - name: Log in to Docker Hub
+        run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/atomic_habits:${{ github.sha }} .
+
+      - name: Push Docker image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/atomic_habits:${{ github.sha }}
+
+#  deploy:
+#    runs-on: ubuntu-latest
+#    needs: build
+#    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+#
+#    steps:
+#      - name: Set up SSH
+#        uses: webfactory/ssh-agent@v0.9.0
+#        with:
+#          ssh-private-key: ${{ secrets.SSH_KEY }}
+#
+#      - name: Deploy to Server
+#        run: |
+#          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+#            cd ~/SkyLearn
+#            git pull origin main
+#
+#            export IMAGE_TAG=${{ github.sha }}
+#
+#            docker compose pull
+#            docker compose up -d
+#            docker image prune -f
+#          EOF
