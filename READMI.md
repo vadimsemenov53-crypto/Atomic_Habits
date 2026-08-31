@@ -9,10 +9,26 @@ REST API-сервис для создания и управления полез
 ---
 
 ## Содержание
+Стек технологий
+Архитектура проекта
+Переменные окружения
+Запуск проекта локально
+Запуск без Docker
+Celery
+Telegram-бот
+API
+Пагинация
+Авторизация
+Валидация
+CI/CD
+Деплой на сервер
+Полезные команды Docker
 
 - [О проекте](#о-проекте)
 - [Основные возможности](#основные-возможности)
 - [Стек технологий](#стек-технологий)
+- [Архитектура проекта](#архитектура-проекта)
+- [Сервисы Докер](#cервисы-докер)
 - [Установка](#установка)
 - [Переменные окружения](#переменные-окружения)
 - [Запуск проекта](#запуск-проекта)
@@ -22,9 +38,8 @@ REST API-сервис для создания и управления полез
 - [Пагинация](#пагинация)
 - [Авторизация](#авторизация)
 - [Валидация](#валидация)
-- [Тестирование](#тестирование)
-- [Документация API](#документация-api)
-- [Структура проекта](#структура-проекта)
+- [Валидация](#валидация)
+- [Валидация](#валидация)
 
 ---
 
@@ -86,19 +101,106 @@ Atomic Habits — сервис для формирования и отслежи
 - Python 3.12
 - Django
 - Django REST Framework
-- PostgreSQL
+- PostgreSQL 17
 - Celery
 - Redis
+- Nginx
+- Docker
+- Docker Compose
 - Telegram Bot API
 - drf-yasg
 - django-cors-headers
-- Pytest / Django Test Framework
-- Coverage
 - Poetry
+- Django Test Framework
+- Coverage
+- Black
+- Isort
+- Flake8
+- GitHub Actions
+- Docker Hub
 
 ---
 
-# Установка
+## Архитектура проекта
+
+Проект состоит из нескольких Docker-контейнеров:
+
+                    Internet
+                       │
+                       ▼
+                    Nginx
+                       │
+                       ▼
+                    Django
+                   /      \
+                  ▼        ▼
+            PostgreSQL    Redis
+                           │
+                    ┌──────┴──────┐
+                    ▼             ▼
+             Celery Worker   Celery Beat
+                    │             │
+                    └──────┬──────┘
+                           ▼
+                    Telegram Bot API
+---
+
+## Сервисы Докер
+
+|Сервис |	Назначение |
+web	Django + Gunicorn
+db	PostgreSQL
+redis	Redis
+celery_worker	Выполнение фоновых задач
+celery_beat	Периодический запуск задач
+nginx	Reverse proxy и раздача static-файлов
+
+| Сервис          | Назначение                            |
+|-----------------|---------------------------------------|
+| `web`           | Django + Gunicorn                     |
+| `db`            | PostgreSQL                            |
+| `redis`         | Redis                                 |
+| `celery_worker` | Выполнение фоновых задач              |
+| `celery_beat`   | Периодический запуск задач            |
+| `nginx`         | Reverse proxy и раздача static-файлов |
+
+Все сервисы запускаются одной командой через Docker Compose.
+
+---
+## Переменные окружения
+
+В репозитории находится файл: 
+````
+.env.sample
+````
+
+Он содержит список необходимых переменных и примеры их значений.
+Перед запуском проекта необходимо создать собственный файл 
+(локально или на удаленном сервере): ".env"
+
+на основе .env.sample.
+
+После этого необходимо указать собственные значения переменных.
+Файл .env не должен добавляться в Git и должен находиться в .gitignore.
+
+---
+
+### Переменные GitHub Secrets
+
+Для работы CI/CD в настройках репозитория GitHub необходимо добавить:
+
+- DOCKER_HUB_USERNAME — имя пользователя Docker Hub.
+- DOCKER_HUB_ACCESS_TOKEN — Access Token Docker Hub.
+- SSH_USER — пользователь для подключения к серверу.
+- SERVER_IP — публичный IP-адрес сервера.
+- SSH_KEY — приватный SSH-ключ для подключения к серверу.
+
+---
+
+## Установка
+
+Для локального запуска необходимо:
+
 
 ## 1. Клонирование проекта
 
@@ -124,23 +226,36 @@ poetry shell
 ---
 
 ## 4. Запуск проекта
-Перед запуском необходимо убедиться, что PostgreSQL и Redis запущены.
-```bash
-python manage.py migrate
-python manage.py csu
-python manage.py runserver
-```
+Для локального запуска всех сервисов используется одна команда:
+
+``docker compose up -d --build``
+
+Docker Compose:
+1. собирает Docker-образ Django;
+2. запускает PostgreSQL;
+3. запускает Redis;
+4. запускает Django;
+5. запускает Celery Worker;
+6. запускает Celery Beat;
+7. запускает Nginx;
+8. выполняет миграции;
+9. собирает static-файлы.
+
+После запуска приложение доступно по адресу: http://localhost
 
 ---
 
-## 5. Celery
+## 5. Проверка контейнеров
 
-Запуск Celery Worker, Celery Beat, Redis
-```bash
-celery -A config worker -l info
-celery -A config beat -l info
-redis-server
-```
+Проверить состояние всех контейнеров:
+
+``docker compose ps``
+
+Все основные сервисы должны находиться в состоянии Up.
+
+---
+
+## 6. Celery
 
 ---
 
@@ -159,6 +274,32 @@ redis-server
 - пользователь получает уведомление
 
 ---
+
+## 7. Запуск без Docker
+
+Docker Compose является основным способом запуска проекта.
+
+При необходимости проект также можно запустить локально без Docker.
+
+Для этого необходимо установить зависимости:
+
+- ``poetry install``
+
+- Запустить PostgreSQL и Redis.
+
+- Выполнить миграции: ``python manage.py migrate``
+
+- Создать суперпользователя: ``python manage.py csu``
+
+- Запустить Django: ``python manage.py runserver``
+
+- Celery Worker: ``celery -A config worker -l info``
+
+- Celery Beat: ``celery -A config beat -l info``
+
+- Redis: ``redis-server``
+
+Для обычного использования проекта рекомендуется Docker Compose, поскольку он автоматически запускает все необходимые сервисы.
 
 ## Telegram-бот
 
@@ -212,3 +353,322 @@ redis-server
 - публичные привычки доступны для просмотра другим пользователям.
 
 Бизнес-правила реализованы на уровне сериализаторов/валидаторов.
+
+
+### Документация API:
+#### Документация API доступна через Swagger.
+
+- Адрес документации: http://IP_Public/swagger/
+
+- Также доступна ReDoc: http://IP_Public/redoc/
+
+---
+---
+
+## Первоначальная настройка сервера
+
+Перед первым запуском проекта на сервере необходимо один раз создать файл .env в корневой директории проекта:
+
+- cd ~/SkyLearn
+- nano .env
+
+Заполнить его переменными, указанными в .env.template.
+
+После создания .env проект можно запустить:
+
+docker compose up -d
+
+---
+
+### Автоматический деплой
+
+После первоначальной настройки .env дальнейший деплой 
+выполняется автоматически через GitHub Actions.
+
+При "push" в ветку -main- workflow:
+
+- Запускает тесты.
+- Запускает Flake8.
+- Собирает Docker-образ.
+- Загружает образ в Docker Hub.
+- Подключается к серверу по SSH.
+- Обновляет код проекта.
+- Загружает новую версию Docker-образа.
+- Перезапускает контейнеры.
+
+-- Файл .env при этом не удаляется и не перезаписывается, поэтому создавать его повторно после каждого деплоя не требуется.
+
+---
+
+### Авторизация
+
+API использует систему авторизации Django REST Framework.
+
+Пользователь может зарегистрироваться, выполнить авторизацию и работать со своими привычками.
+
+Доступ к объектам ограничивается в соответствии с правами пользователя.
+
+---
+
+## CI/CD
+
+Для проекта настроен автоматический CI/CD pipeline с использованием GitHub Actions.
+
+Pipeline состоит из следующих этапов:
+
+    Push / Pull Request
+        │ 
+        ▼
+      TEST
+        │
+        ▼
+      LINT
+        │
+        ▼
+      BUILD
+        │
+        ▼
+     Docker Hub
+        │
+        ▼
+     DEPLOY
+        │
+        ▼
+     SERVER
+
+---
+
+### Test
+
+GitHub Actions:
+
+- устанавливает Python 3.12;
+- устанавливает Poetry;
+- устанавливает зависимости;
+- запускает миграции;
+- запускает тесты проекта.
+
+Пример команды (для ручного запуска):
+
+```bash
+docker compose exec web poetry run python manage.py test
+```
+
+---
+
+### Lint
+
+Проверка качества Python-кода выполняется с помощью Flake8:
+
+```bash
+docker compose exec web poetry run flake8 .
+```
+
+---
+
+### Build
+
+После успешного прохождения тестов и линтинга GitHub Actions собирает Docker-образ Django.
+
+Каждому образу присваивается уникальный тег на основе Git commit SHA:
+
+``{DOCKER_HUB_USERNAME}/atomic_habits:<commit_sha>``
+
+После сборки образ отправляется в Docker Hub.
+
+---
+
+### Деплой на сервер
+
+После успешного прохождения:
+
+    TEST
+     ↓
+    LINT
+     ↓
+    BUILD
+
+    при push в ветку main автоматически запускается этап DEPLOY.
+
+GitHub Actions подключается к удалённому серверу по SSH.
+На сервере выполняются следующие действия:
+
+- cd ~/Atomic_Habits
+- git pull origin main
+- export IMAGE_TAG=<commit_sha>
+- docker compose pull
+- docker compose up -d
+- docker image prune -f
+
+Таким образом сервер автоматически получает новую версию Docker-образа.
+
+---
+
+# Важный момент
+
+На сервере должен быть заранее создан файл:
+
+``.env``
+
+GitHub Actions не передаёт .env из репозитория, 
+поскольку файл содержит секретные данные и не хранится в Git.
+
+.env создаётся на сервере один раз вручную и далее 
+используется Docker Compose при каждом деплое.
+
+При последующих деплоях GitHub Actions обновляет Docker-образ,
+а существующий .env продолжает использоваться.
+
+---
+
+## Docker Compose и IMAGE_TAG
+
+В docker-compose.yml используется:
+
+````
+image: ${DOCKER_HUB_USERNAME}/atomic_habits:${IMAGE_TAG:-latest}
+
+build: .
+````
+
+Это позволяет использовать один docker-compose.yml 
+и для локального запуска, и для деплоя.
+
+### Локально
+
+Если IMAGE_TAG не указан:
+
+``docker compose up -d --build``
+
+используется тег:
+``latest``
+
+При этом Docker Compose может собрать образ локально благодаря:
+``build: .``
+
+### На сервере
+
+GitHub Actions передаёт конкретный тег:
+
+``export IMAGE_TAG=<commit_sha>``
+
+После чего:
+````
+docker compose pull
+docker compose up -d
+````
+загружает соответствующий образ из Docker Hub.
+
+Таким образом один и тот же Compose-файл поддерживает оба сценария:
+
+### Локально
+    docker compose up -d --build
+        │
+        ▼
+    локальная сборка
+
+
+### Сервер
+    docker compose pull
+        │
+        ▼
+    Docker Hub
+        │
+        ▼
+    готовый образ
+
+---
+
+### Полезные команды Docker
+Запустить проект
+``docker compose up -d``
+
+Запустить с пересборкой
+``docker compose up -d --build``
+
+Остановить проект
+``docker compose down``
+
+Посмотреть состояние контейнеров
+``docker compose ps``
+
+Посмотреть логи
+``docker compose logs``
+
+Посмотреть логи конкретного сервиса
+``docker compose logs web``
+
+#### Выполнить Django-команду внутри контейнера
+
+Например, запустить тесты:
+``docker compose exec web python manage.py test``
+
+Выполнить миграции вручную
+``docker compose exec web python manage.py migrate``
+
+Создать суперпользователя
+``docker compose exec web python manage.py createsuperuser``
+
+Удалить неиспользуемые Docker-образы
+``docker image prune -f``
+
+Команда docker image prune -f удаляет неиспользуемые 
+Docker-образы и помогает освобождать место на сервере.
+
+---
+
+### Остановка проекта
+
+Для остановки всех сервисов: ``docker compose down``
+
+Docker Compose остановит и удалит контейнеры и сеть проекта.
+
+Именованные volumes PostgreSQL, Redis и static-файлов при этом сохраняются.
+
+Для повторного запуска: ``docker compose up -d``
+
+---
+
+## Результат
+
+Проект соответствует следующей схеме работы:
+
+    Разработка
+    │
+    ▼
+    GitHub
+    │
+    ├── TEST
+    │
+    ├── LINT
+    │
+    ├── BUILD
+    │
+    ▼
+    Docker Hub
+    │
+    ▼
+    GitHub Actions
+    │
+    ▼
+    SSH
+    │
+    ▼
+    Удалённый сервер
+    │
+    ▼
+    Docker Compose
+    │
+    ├── Django
+    ├── PostgreSQL
+    ├── Redis
+    ├── Celery Worker
+    ├── Celery Beat
+    └── Nginx
+
+Проект можно запустить локально одной командой:
+
+    docker compose up -d --build
+
+После успешного прохождения CI/CD pipeline проект 
+автоматически разворачивается на удалённом сервере.
