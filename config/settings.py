@@ -24,7 +24,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 DEBUG = True if os.getenv("DEBUG") == "True" else False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -133,9 +133,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://read-and-write.example.com",
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://read-and-write.example.com",
-]
+CSRF_TRUSTED_ORIGINS = os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
 
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
@@ -153,3 +151,10 @@ CELERY_BEAT_SCHEDULE = {
 
 TELEGRAM_URL = "https://api.telegram.org/bot"
 TOKEN_BOT_TG = os.getenv("TOKEN_BOT_TG")
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": os.getenv("CACHES_LOCATION"),  # крайнее число - база данных, можно использовать любую от 0 до 15
+    }
+}
